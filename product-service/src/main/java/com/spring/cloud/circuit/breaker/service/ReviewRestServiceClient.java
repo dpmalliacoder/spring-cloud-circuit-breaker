@@ -34,6 +34,11 @@ public class ReviewRestServiceClient {
     private ProductReviewDto getRating(int productId){
         return this.client.get()
                 .uri("{productId}", productId)
+                .headers( httpHeaders -> {
+                    httpHeaders.add("Accept", "application/json");
+                    httpHeaders.add("Content-Type", "application/json");
+                    httpHeaders.add("X-Tenant", "mytenant");
+                })
                 .retrieve()
                 .body(ProductReviewDto.class);
     }
