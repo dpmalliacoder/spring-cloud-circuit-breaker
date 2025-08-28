@@ -25,8 +25,8 @@ public class ReviewRestServiceClient {
         this.executorService = executorService;
     }
 
-    @Retry(name = "reviewService", fallbackMethod = "onFailure")
-    @CircuitBreaker(name = "ratingService", fallbackMethod = "onFailure")
+    @Retry(name = "review-service", fallbackMethod = "onFailure")
+    @CircuitBreaker(name = "review-service", fallbackMethod = "onFailure")
     public CompletionStage<ProductReviewDto> getProductRatingDto(int productId) {
         return CompletableFuture.supplyAsync(() -> this.getRating(productId), executorService);
     }

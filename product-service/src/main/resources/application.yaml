@@ -13,22 +13,22 @@ spring:
         hibernate:
             ddl-auto: update
         show-sql: true
-    management:
-        endpoint:
-            health:
-                show-details: always
-        endpoints:
-            web:
-                exposure:
-                    include: health
-        health:
-            circuitbreakers:
-                enabled: true
 
     threads:
         virtual:
             enabled: true
-
+---
+management:
+    endpoint:
+        health:
+            show-details: always
+    endpoints:
+        web:
+            exposure:
+                include: health
+    health:
+        circuitbreakers:
+            enabled: true
 ---
 server:
     port: 8081
@@ -36,32 +36,34 @@ server:
 ---
 review:
     service:
-        endpoint: http://localhost:8082/api/v1/reviews/
+        endpoint:
+            url: http://localhost:8082/api/v1/reviews/products/
 ---
 resilience4j.retry:
     instances:
-        ratingService:
+        review-service:
             maxRetryAttempts: 2
             waitDuration: 1s
             retryExceptions:
                 - org.springframework.web.client.HttpServerErrorException
             ignoreExceptions:
                 - org.springframework.web.client.HttpClientErrorException
-                -
 resilience4j:
     circuitbreaker:
         configs:
             default:
                 sliding-window-type: COUNT_BASED
                 sliding-window-size: 10
-                permitted-number-of-calls-in-half-open-state: 10
-                wait-duration-in-open-state: 10
+                permitted-number-of-calls-in-half-open-state: 3
+                wait-duration-in-open-state: 10s
                 failure-rate-threshold: 60
+                minimum-number-of-calls: 5
                 recordExceptions:
                     - org.springframework.web.client.HttpServerErrorException
+                    - org.springframework.web.client.HttpClientErrorException
                 automatic-transition-from-open-to-half-open-enabled: true
                 register-health-indicator: true
-    instances:
-        review-service:
-            baseConfig: default
+        instances:
+            review-service:
+                baseConfig: default
 
