@@ -13,6 +13,55 @@ spring:
         hibernate:
             ddl-auto: update
         show-sql: true
+    management:
+        endpoint:
+            health:
+                show-details: always
+        endpoints:
+            web:
+                exposure:
+                    include: health
+        health:
+            circuitbreakers:
+                enabled: true
 
+    threads:
+        virtual:
+            enabled: true
+
+---
 server:
     port: 8081
+
+---
+review:
+    service:
+        endpoint: http://localhost:8082/api/v1/reviews/
+---
+resilience4j.retry:
+    instances:
+        ratingService:
+            maxRetryAttempts: 2
+            waitDuration: 1s
+            retryExceptions:
+                - org.springframework.web.client.HttpServerErrorException
+            ignoreExceptions:
+                - org.springframework.web.client.HttpClientErrorException
+                -
+resilience4j:
+    circuitbreaker:
+        configs:
+            default:
+                sliding-window-type: COUNT_BASED
+                sliding-window-size: 10
+                permitted-number-of-calls-in-half-open-state: 10
+                wait-duration-in-open-state: 10
+                failure-rate-threshold: 60
+                recordExceptions:
+                    - org.springframework.web.client.HttpServerErrorException
+                automatic-transition-from-open-to-half-open-enabled: true
+                register-health-indicator: true
+    instances:
+        review-service:
+            baseConfig: default
+

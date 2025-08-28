@@ -1,0 +1,5 @@
+product_id,comment,rating,user_name
+1, excellent, 9, myuser
+1, average, 5, testuser
+2, poor, 4, robson
+2, average, 6, thomas
